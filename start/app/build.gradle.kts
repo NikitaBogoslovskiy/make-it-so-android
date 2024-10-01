@@ -89,6 +89,9 @@ dependencies {
     implementation("com.google.firebase:firebase-config")
     implementation("com.google.firebase:firebase-messaging")
 
+    //Google
+    //implementation("com.google.android.gms:play-services-auth:21.2.0")
+
     //Test
     testImplementation("junit:junit:4.+")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
