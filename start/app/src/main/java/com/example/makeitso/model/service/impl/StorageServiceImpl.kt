@@ -80,7 +80,7 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
   }
 
   override suspend fun delete(user: User) {
-    firestore.collection(TASK_COLLECTION).document(user.id).delete().await()
+    firestore.collection(USERS_COLLECTION).document(user.id).delete().await()
   }
 
   companion object {

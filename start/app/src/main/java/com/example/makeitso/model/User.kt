@@ -32,8 +32,8 @@ data class User(
         @JvmStatic
         fun fromFirebaseUser(firebaseUser: FirebaseUser) = User(
             uid = firebaseUser.uid,
-            name = firebaseUser.displayName ?: "",
-            login = firebaseUser.email ?: "",
+            name = (firebaseUser.providerData.firstOrNull { !it.displayName.isNullOrEmpty() }?.displayName) ?: "",
+            login = (firebaseUser.providerData.firstOrNull { !it.email.isNullOrEmpty() }?.email) ?: "",
             authTypes = firebaseUser.providerData.map {
                 when (it.providerId) {
                     "password" -> "Login and Password"

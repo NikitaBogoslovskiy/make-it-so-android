@@ -21,6 +21,7 @@ import com.example.makeitso.GoogleAuthData
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.SIGN_UP_SCREEN
+import com.example.makeitso.TASKS_SCREEN
 import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.ext.isValidPassword
 import com.example.makeitso.common.ext.passwordMatches
@@ -78,7 +79,7 @@ class SignUpViewModel @Inject constructor(
 
     launchCatching {
       accountService.linkAccount(email, password)
-      openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
+      openAndPopUp(TASKS_SCREEN, SIGN_UP_SCREEN)
       val user = User.fromFirebaseUser(accountService.getCurrentAccount())
       storageService.save(user)
     }

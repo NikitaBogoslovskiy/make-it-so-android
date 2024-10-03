@@ -26,11 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.makeitso.TASKS_SCREEN
 import com.example.makeitso.R.drawable as AppIcon
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.*
 import com.example.makeitso.common.ext.card
 import com.example.makeitso.common.ext.spacer
+import com.example.makeitso.common.ext.toolbarActions
 import com.example.makeitso.theme.MakeItSoTheme
 
 @ExperimentalMaterialApi
@@ -48,7 +50,8 @@ fun SettingsScreen(
     onLoginClick = { viewModel.onLoginClick(openScreen) },
     onSignUpClick = { viewModel.onSignUpClick(openScreen) },
     onSignOutClick = { viewModel.onSignOutClick(restartApp) },
-    onDeleteMyAccountClick = { viewModel.onDeleteMyAccountClick(restartApp) }
+    onDeleteMyAccountClick = { viewModel.onDeleteMyAccountClick(restartApp) },
+    onListClick = { openScreen(TASKS_SCREEN) }
   )
 }
 
@@ -60,13 +63,23 @@ fun SettingsScreenContent(
   onLoginClick: () -> Unit,
   onSignUpClick: () -> Unit,
   onSignOutClick: () -> Unit,
-  onDeleteMyAccountClick: () -> Unit
+  onDeleteMyAccountClick: () -> Unit,
+  onListClick: () -> Unit
 ) {
   Column(
     modifier = modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState()),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    BasicToolbar(AppText.settings)
+    if (uiState.isAnonymousAccount) {
+      BasicToolbar(AppText.settings)
+    } else {
+      ActionToolbar(
+        title = AppText.settings,
+        modifier = Modifier.toolbarActions(),
+        endActionIcon = AppIcon.ic_list,
+        endAction = { onListClick() }
+      )
+    }
 
     Spacer(modifier = Modifier.spacer())
 
@@ -151,7 +164,8 @@ fun SettingsScreenPreview() {
       onLoginClick = { },
       onSignUpClick = { },
       onSignOutClick = { },
-      onDeleteMyAccountClick = { }
+      onDeleteMyAccountClick = { },
+      onListClick = { }
     )
   }
 }

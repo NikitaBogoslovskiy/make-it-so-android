@@ -50,8 +50,15 @@ class SettingsViewModel @Inject constructor(
 
   fun onDeleteMyAccountClick(restartApp: (String) -> Unit) {
     launchCatching {
-      accountService.deleteAccount()
-      restartApp(SPLASH_SCREEN)
+      storageService.users.collect {
+        val user = it.firstOrNull()
+        if (user != null) {
+          storageService.delete(user)
+        }
+        accountService.deleteAccount()
+        restartApp(SPLASH_SCREEN)
+      }
     }
   }
+
 }
