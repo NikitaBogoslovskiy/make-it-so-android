@@ -22,6 +22,7 @@ import com.example.makeitso.model.service.trace
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -47,11 +48,19 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
     }
 
   override suspend fun authenticate(email: String, password: String) {
+    val account = getCurrentAccount()
     auth.signInWithEmailAndPassword(email, password).await()
+    if (account.isAnonymous) {
+      deleteAccount(account)
+    }
   }
 
   override suspend fun authenticate(authCredential: AuthCredential) {
+    val account = getCurrentAccount()
     auth.signInWithCredential(authCredential).await()
+    if (account.isAnonymous) {
+      deleteAccount(account)
+    }
   }
 
   override suspend fun linkAccount(authCredential: AuthCredential) {
@@ -76,13 +85,20 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
   }
 
   override suspend fun signOut() {
-    if (auth.currentUser!!.isAnonymous) {
-      auth.currentUser!!.delete()
+    val account = getCurrentAccount()
+    if (account.isAnonymous) {
+      deleteAccount(account)
     }
     auth.signOut()
 
     // Sign the user back in anonymously.
     createAnonymousAccount()
+  }
+
+  private fun getCurrentAccount() = auth.currentUser!!
+
+  private fun deleteAccount(account: FirebaseUser) {
+      account.delete()
   }
 
   companion object {
