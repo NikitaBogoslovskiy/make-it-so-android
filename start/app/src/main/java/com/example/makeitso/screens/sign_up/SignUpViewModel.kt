@@ -37,6 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
   private val accountService: AccountService,
+  private val storageService: StorageService,
   logService: LogService
 ) : MakeItSoViewModel(logService) {
   var uiState = mutableStateOf(SignUpUiState())
@@ -78,6 +79,8 @@ class SignUpViewModel @Inject constructor(
     launchCatching {
       accountService.linkAccount(email, password)
       openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
+      val user = User.fromFirebaseUser(accountService.getCurrentAccount())
+      storageService.save(user)
     }
   }
 }

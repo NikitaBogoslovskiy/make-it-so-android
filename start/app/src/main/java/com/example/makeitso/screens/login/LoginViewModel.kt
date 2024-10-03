@@ -105,7 +105,6 @@ class LoginViewModel @Inject constructor(
   }
 
   private suspend fun saveUserIfDoNotExist() {
-    //val firebaseUser = accountService.getCurrentAccount()
     storageService.users.collect {
       var user = it.firstOrNull()
       if (user == null) {
@@ -113,10 +112,5 @@ class LoginViewModel @Inject constructor(
         storageService.save(user)
       }
     }
-/*    var user = storageService.getUser(firebaseUser.uid)
-    if (user == null) {
-      user = User.fromFirebaseUser(accountService.getCurrentAccount())
-      storageService.save(user)
-    }*/
   }
 }
