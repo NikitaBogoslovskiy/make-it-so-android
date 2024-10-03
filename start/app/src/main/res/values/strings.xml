@@ -56,4 +56,9 @@
 
     <string name="your_web_client_id">850488894918-jht0b62dqrncpt3np8ebdpahhdua3bdu.apps.googleusercontent.com</string>
     <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="name">Name</string>
+    <string name="birth_date">Birth date</string>
+    <string name="login">Login</string>
+    <string name="auth_type">Auth type</string>
+    <string name="edit_settings">Edit settings</string>
 </resources>

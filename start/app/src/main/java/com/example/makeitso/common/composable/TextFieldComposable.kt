@@ -49,6 +49,24 @@ fun BasicField(
 }
 
 @Composable
+fun BasicPlainField(
+  @StringRes text: Int,
+  value: String,
+  onNewValue: (String) -> Unit,
+  modifier: Modifier = Modifier,
+  readOnly: Boolean = false
+) {
+  OutlinedTextField(
+    singleLine = true,
+    modifier = modifier,
+    value = value,
+    onValueChange = { onNewValue(it) },
+    label = { Text(stringResource(text)) },
+    readOnly = readOnly
+  )
+}
+
+@Composable
 fun EmailField(value: String, onNewValue: (String) -> Unit, modifier: Modifier = Modifier) {
   OutlinedTextField(
     singleLine = true,

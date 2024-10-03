@@ -16,16 +16,26 @@ limitations under the License.
 
 package com.example.makeitso.screens.settings
 
+import androidx.compose.runtime.mutableStateOf
 import com.example.makeitso.LOGIN_SCREEN
 import com.example.makeitso.SIGN_UP_SCREEN
 import com.example.makeitso.SPLASH_SCREEN
+import com.example.makeitso.common.ext.idFromParameter
+import com.example.makeitso.model.Task
+import com.example.makeitso.model.User
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
 import com.example.makeitso.model.service.StorageService
 import com.example.makeitso.screens.MakeItSoViewModel
+import com.example.makeitso.screens.edit_task.EditTaskViewModel.Companion.DATE_FORMAT
+import com.example.makeitso.screens.edit_task.EditTaskViewModel.Companion.UTC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -33,8 +43,41 @@ class SettingsViewModel @Inject constructor(
   private val accountService: AccountService,
   private val storageService: StorageService
 ) : MakeItSoViewModel(logService) {
-  val uiState = accountService.currentUser.map {
+  var uiState = accountService.currentUser.map {
     SettingsUiState(it.isAnonymous)
+  }
+  val user = mutableStateOf(User())
+  val isEdited = mutableStateOf(false)
+
+  init {
+    launchCatching {
+      storageService.users.collect {
+        val firstUser = it.firstOrNull()
+        if (firstUser != null) {
+          user.value = storageService.getUser(firstUser.id) ?: User()
+        }
+      }
+    }
+  }
+
+  fun onNameChange(newValue: String) {
+    user.value = user.value.copy(name = newValue)
+    isEdited.value = true
+  }
+
+  fun onBirthDateChange(newValue: Long) {
+    val calendar = Calendar.getInstance(TimeZone.getTimeZone(UTC))
+    calendar.timeInMillis = newValue
+    val newDueDate = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH).format(calendar.time)
+    user.value = user.value.copy(birthDate = newDueDate)
+    isEdited.value = true
+  }
+
+  fun onDoneClick() {
+    launchCatching {
+      storageService.update(user.value)
+      isEdited.value = false
+    }
   }
 
   fun onLoginClick(openScreen: (String) -> Unit) = openScreen(LOGIN_SCREEN)

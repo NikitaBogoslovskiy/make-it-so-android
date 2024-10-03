@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.example.makeitso.screens.settings
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,16 +24,24 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.makeitso.R
 import com.example.makeitso.TASKS_SCREEN
 import com.example.makeitso.R.drawable as AppIcon
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.*
 import com.example.makeitso.common.ext.card
+import com.example.makeitso.common.ext.fieldModifier
 import com.example.makeitso.common.ext.spacer
 import com.example.makeitso.common.ext.toolbarActions
+import com.example.makeitso.model.User
+import com.example.makeitso.screens.edit_task.showDatePicker
 import com.example.makeitso.theme.MakeItSoTheme
 
 @ExperimentalMaterialApi
@@ -42,16 +51,27 @@ fun SettingsScreen(
   openScreen: (String) -> Unit,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
-  val uiState by viewModel.uiState.collectAsState(
+  val uiState = viewModel.uiState.collectAsState(
     initial = SettingsUiState(false)
   )
+  val user by viewModel.user
+  val isEdited by viewModel.isEdited
+  val activity = LocalContext.current as AppCompatActivity
+  val focusManager = LocalFocusManager.current
   SettingsScreenContent(
     uiState = uiState,
+    user = user,
+    isEdited = isEdited,
+    activity = activity,
+    focusManager = focusManager,
     onLoginClick = { viewModel.onLoginClick(openScreen) },
     onSignUpClick = { viewModel.onSignUpClick(openScreen) },
     onSignOutClick = { viewModel.onSignOutClick(restartApp) },
     onDeleteMyAccountClick = { viewModel.onDeleteMyAccountClick(restartApp) },
-    onListClick = { openScreen(TASKS_SCREEN) }
+    onListClick = { openScreen(TASKS_SCREEN) },
+    onDoneClick = { viewModel.onDoneClick() },
+    onNameChange = viewModel::onNameChange,
+    onBirthDateChange = viewModel::onBirthDateChange
   )
 }
 
@@ -59,31 +79,59 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreenContent(
   modifier: Modifier = Modifier,
-  uiState: SettingsUiState,
+  user: User,
+  uiState: State<SettingsUiState>,
+  isEdited: Boolean,
+  activity: AppCompatActivity?,
+  focusManager: FocusManager?,
   onLoginClick: () -> Unit,
   onSignUpClick: () -> Unit,
   onSignOutClick: () -> Unit,
   onDeleteMyAccountClick: () -> Unit,
-  onListClick: () -> Unit
+  onListClick: () -> Unit,
+  onDoneClick: () -> Unit,
+  onNameChange: (String) -> Unit,
+  onBirthDateChange: (Long) -> Unit,
+  viewModel: SettingsViewModel = hiltViewModel()
 ) {
+
+  fun wrapDoner(func: () -> Unit): () -> Unit {
+    return {
+      func()
+      focusManager?.clearFocus()
+    }
+  }
+
   Column(
-    modifier = modifier.fillMaxWidth().fillMaxHeight().verticalScroll(rememberScrollState()),
+    modifier = modifier
+      .fillMaxWidth()
+      .fillMaxHeight()
+      .verticalScroll(rememberScrollState()),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    if (uiState.isAnonymousAccount) {
+    if (uiState.value.isAnonymousAccount) {
       BasicToolbar(AppText.settings)
     } else {
-      ActionToolbar(
-        title = AppText.settings,
-        modifier = Modifier.toolbarActions(),
-        endActionIcon = AppIcon.ic_list,
-        endAction = { onListClick() }
-      )
+      if (!isEdited) {
+        ActionToolbar(
+          title = AppText.settings,
+          modifier = Modifier.toolbarActions(),
+          endActionIcon = AppIcon.ic_list,
+          endAction = { onListClick() }
+        )
+      } else {
+        ActionToolbar(
+          title = AppText.edit_settings,
+          modifier = Modifier.toolbarActions(),
+          endActionIcon = AppIcon.ic_check,
+          endAction = { wrapDoner(onDoneClick)() }
+        )
+      }
     }
 
     Spacer(modifier = Modifier.spacer())
 
-    if (uiState.isAnonymousAccount) {
+    if (uiState.value.isAnonymousAccount) {
       RegularCardEditor(AppText.sign_in, AppIcon.ic_sign_in, "", Modifier.card()) {
         onLoginClick()
       }
@@ -91,6 +139,14 @@ fun SettingsScreenContent(
         onSignUpClick()
       }
     } else {
+      val fieldModifier = Modifier.fieldModifier()
+      BasicPlainField(AppText.name, user.name, onNameChange, fieldModifier)
+      BasicPlainField(AppText.login, user.login, { }, fieldModifier, readOnly = true)
+      BasicPlainField(AppText.auth_type, user.authTypes.joinToString(), { }, fieldModifier, readOnly = true)
+      RegularCardEditor(AppText.birth_date, AppIcon.ic_calendar, user.birthDate, Modifier.card()) {
+        showDatePicker(activity, onBirthDateChange)
+      }
+      Spacer(modifier = Modifier.spacer())
       SignOutCard { onSignOutClick() }
       DeleteMyAccountCard { onDeleteMyAccountClick() }
     }
@@ -156,16 +212,24 @@ private fun DeleteMyAccountCard(deleteMyAccount: () -> Unit) {
 @ExperimentalMaterialApi
 @Composable
 fun SettingsScreenPreview() {
-  val uiState = SettingsUiState(isAnonymousAccount = false)
+  val uiState = remember { mutableStateOf(SettingsUiState(isAnonymousAccount = false)) }
+  val user = User()
 
   MakeItSoTheme {
     SettingsScreenContent(
       uiState = uiState,
+      isEdited = false,
       onLoginClick = { },
       onSignUpClick = { },
       onSignOutClick = { },
       onDeleteMyAccountClick = { },
-      onListClick = { }
+      onListClick = { },
+      onDoneClick = { },
+      onNameChange = { },
+      onBirthDateChange = { },
+      activity = null,
+      focusManager = null,
+      user = user
     )
   }
 }

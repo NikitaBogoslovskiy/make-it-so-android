@@ -142,7 +142,7 @@ private fun CardSelectors(
   }
 }
 
-private fun showDatePicker(activity: AppCompatActivity?, onDateChange: (Long) -> Unit) {
+fun showDatePicker(activity: AppCompatActivity?, onDateChange: (Long) -> Unit) {
   val picker = MaterialDatePicker.Builder.datePicker().build()
 
   activity?.let {
