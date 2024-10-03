@@ -16,7 +16,11 @@ limitations under the License.
 
 package com.example.makeitso
 
+import android.content.ContentValues.TAG
+import android.content.Intent
+import android.content.IntentSender
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
@@ -29,7 +33,44 @@ import dagger.hilt.android.AndroidEntryPoint
 class MakeItSoActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
     setContent { MakeItSoApp() }
+    GoogleAuthData.init(this)
+
+    GoogleAuthData.beginSignIn = {
+      GoogleAuthData.oneTapClient.beginSignIn(GoogleAuthData.signInRequest)
+        .addOnSuccessListener(this) { result ->
+          try {
+            startIntentSenderForResult(
+              result.pendingIntent.intentSender, GoogleAuthData.REQ_ONE_TAP_AUTH,
+              null, 0, 0, 0, null)
+          } catch (e: IntentSender.SendIntentException) {
+            Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+          }
+        }
+        .addOnFailureListener(this) { e ->
+          Log.d(TAG, e.localizedMessage)
+        }
+    }
+
+    GoogleAuthData.beginSignUp = {
+      GoogleAuthData.oneTapClient.beginSignIn(GoogleAuthData.signUpRequest)
+        .addOnSuccessListener(this) { result ->
+          try {
+            startIntentSenderForResult(
+              result.pendingIntent.intentSender, GoogleAuthData.REQ_ONE_TAP_SIGNUP,
+              null, 0, 0, 0, null)
+          } catch (e: IntentSender.SendIntentException) {
+            Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+          }
+        }
+        .addOnFailureListener(this) { e ->
+          Log.d(TAG, e.localizedMessage)
+        }
+    }
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    GoogleAuthData.processIntent(requestCode, data)
   }
 }

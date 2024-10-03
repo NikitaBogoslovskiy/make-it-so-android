@@ -19,6 +19,7 @@
 
     <!-- SignUpScreen -->
     <string name="create_account">Create account</string>
+    <string name="sign_up_with_google">Sign up with Google</string>
     <string name="password_error">Your password should be at least six characters long and include one digit, one lowercase letter and one uppercase letter.</string>
     <string name="password_match_error">Passwords do not match.</string>
 
@@ -52,4 +53,7 @@
     <string name="notification_permission_title">Notification permission</string>
     <string name="notification_permission_description">The notification permission is important for this app. Please grant the permission.</string>
     <string name="notification_permission_settings">The notification permission is important for this app. Please navigate to your device settings and enable notifications for Make it So.</string>
+
+    <string name="your_web_client_id">850488894918-jht0b62dqrncpt3np8ebdpahhdua3bdu.apps.googleusercontent.com</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
 </resources>

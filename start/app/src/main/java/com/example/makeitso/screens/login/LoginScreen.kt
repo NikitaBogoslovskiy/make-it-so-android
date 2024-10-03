@@ -23,8 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.makeitso.R
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.*
 import com.example.makeitso.common.ext.basicButton
@@ -44,6 +47,7 @@ fun LoginScreen(
     onEmailChange = viewModel::onEmailChange,
     onPasswordChange = viewModel::onPasswordChange,
     onSignInClick = { viewModel.onSignInClick(openAndPopUp) },
+    onSignInWithGoogleClick = { viewModel.onSignInWithGoogleClick(openAndPopUp) },
     onForgotPasswordClick = viewModel::onForgotPasswordClick
   )
 }
@@ -55,6 +59,7 @@ fun LoginScreenContent(
   onEmailChange: (String) -> Unit,
   onPasswordChange: (String) -> Unit,
   onSignInClick: () -> Unit,
+  onSignInWithGoogleClick: () -> Unit,
   onForgotPasswordClick: () -> Unit
 ) {
   BasicToolbar(AppText.login_details)
@@ -71,7 +76,7 @@ fun LoginScreenContent(
     PasswordField(uiState.password, onPasswordChange, Modifier.fieldModifier())
 
     BasicButton(AppText.sign_in, Modifier.basicButton()) { onSignInClick() }
-
+    BasicButton(AppText.sign_in_with_google, Modifier.basicButton()) { onSignInWithGoogleClick() }
     BasicTextButton(AppText.forgot_password, Modifier.textButton()) {
       onForgotPasswordClick()
     }
@@ -91,6 +96,7 @@ fun LoginScreenPreview() {
       onEmailChange = { },
       onPasswordChange = { },
       onSignInClick = { },
+      onSignInWithGoogleClick = { },
       onForgotPasswordClick = { }
     )
   }

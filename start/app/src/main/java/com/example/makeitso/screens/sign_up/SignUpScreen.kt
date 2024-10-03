@@ -42,7 +42,8 @@ fun SignUpScreen(
     onEmailChange = viewModel::onEmailChange,
     onPasswordChange = viewModel::onPasswordChange,
     onRepeatPasswordChange = viewModel::onRepeatPasswordChange,
-    onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) }
+    onSignUpClick = { viewModel.onSignUpClick(openAndPopUp) },
+    onSignUpWithGoogleClick = { viewModel.onSignUpWithGoogleClick(openAndPopUp) },
   )
 }
 
@@ -53,7 +54,8 @@ fun SignUpScreenContent(
   onEmailChange: (String) -> Unit,
   onPasswordChange: (String) -> Unit,
   onRepeatPasswordChange: (String) -> Unit,
-  onSignUpClick: () -> Unit
+  onSignUpClick: () -> Unit,
+  onSignUpWithGoogleClick: () -> Unit
 ) {
   val fieldModifier = Modifier.fieldModifier()
 
@@ -71,6 +73,9 @@ fun SignUpScreenContent(
     BasicButton(AppText.create_account, Modifier.basicButton()) {
       onSignUpClick()
     }
+    BasicButton(AppText.sign_up_with_google, Modifier.basicButton()) {
+      onSignUpWithGoogleClick()
+    }
   }
 }
 
@@ -87,7 +92,8 @@ fun SignUpScreenPreview() {
       onEmailChange = { },
       onPasswordChange = { },
       onRepeatPasswordChange = { },
-      onSignUpClick = { }
+      onSignUpClick = { },
+      onSignUpWithGoogleClick = { },
     )
   }
 }

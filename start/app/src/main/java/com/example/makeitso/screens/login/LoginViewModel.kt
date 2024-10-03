@@ -16,23 +16,39 @@ limitations under the License.
 
 package com.example.makeitso.screens.login
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
+import com.example.makeitso.GoogleAuthData
 import com.example.makeitso.LOGIN_SCREEN
-import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.snackbar.SnackbarManager
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
 import com.example.makeitso.screens.MakeItSoViewModel
+import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import com.example.makeitso.R.string as AppText
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val accountService: AccountService,
-  logService: LogService
+  logService: LogService,
 ) : MakeItSoViewModel(logService) {
+  private lateinit var popup: () -> Unit
+
+  init {
+      GoogleAuthData.auth = { token ->
+        val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
+        launchCatching {
+          accountService.authenticate(firebaseCredential)
+          popup()
+        }
+      }
+  }
+
   var uiState = mutableStateOf(LoginUiState())
     private set
 
@@ -64,6 +80,11 @@ class LoginViewModel @Inject constructor(
       accountService.authenticate(email, password)
       openAndPopUp(SETTINGS_SCREEN, LOGIN_SCREEN)
     }
+  }
+
+  fun onSignInWithGoogleClick(openAndPopUp: (String, String) -> Unit) {
+    popup = { openAndPopUp(SETTINGS_SCREEN, LOGIN_SCREEN) }
+    GoogleAuthData.beginSignIn()
   }
 
   fun onForgotPasswordClick() {

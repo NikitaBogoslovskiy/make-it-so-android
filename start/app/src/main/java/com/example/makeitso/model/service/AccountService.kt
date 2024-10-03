@@ -17,6 +17,7 @@ limitations under the License.
 package com.example.makeitso.model.service
 
 import com.example.makeitso.model.User
+import com.google.firebase.auth.AuthCredential
 import kotlinx.coroutines.flow.Flow
 
 interface AccountService {
@@ -26,9 +27,11 @@ interface AccountService {
   val currentUser: Flow<User>
 
   suspend fun authenticate(email: String, password: String)
+  suspend fun authenticate(authCredential: AuthCredential)
   suspend fun sendRecoveryEmail(email: String)
   suspend fun createAnonymousAccount()
   suspend fun linkAccount(email: String, password: String)
+  suspend fun linkAccount(authCredential: AuthCredential)
   suspend fun deleteAccount()
   suspend fun signOut()
 }

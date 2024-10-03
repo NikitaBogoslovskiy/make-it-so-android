@@ -17,6 +17,7 @@ limitations under the License.
 package com.example.makeitso.screens.sign_up
 
 import androidx.compose.runtime.mutableStateOf
+import com.example.makeitso.GoogleAuthData
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.SIGN_UP_SCREEN
@@ -27,6 +28,7 @@ import com.example.makeitso.common.snackbar.SnackbarManager
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
 import com.example.makeitso.screens.MakeItSoViewModel
+import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -35,6 +37,18 @@ class SignUpViewModel @Inject constructor(
   private val accountService: AccountService,
   logService: LogService
 ) : MakeItSoViewModel(logService) {
+  private lateinit var popup: () -> Unit
+
+  init {
+    GoogleAuthData.signup = { token ->
+      val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
+      launchCatching {
+        accountService.linkAccount(firebaseCredential)
+        popup()
+      }
+    }
+  }
+
   var uiState = mutableStateOf(SignUpUiState())
     private set
 
@@ -75,5 +89,10 @@ class SignUpViewModel @Inject constructor(
       accountService.linkAccount(email, password)
       openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
     }
+  }
+
+  fun onSignUpWithGoogleClick(openAndPopUp: (String, String) -> Unit) {
+    popup = { openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN) }
+    GoogleAuthData.beginSignUp()
   }
 }
