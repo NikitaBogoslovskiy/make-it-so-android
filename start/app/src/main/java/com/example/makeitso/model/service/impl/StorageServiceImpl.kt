@@ -17,6 +17,7 @@ limitations under the License.
 package com.example.makeitso.model.service.impl
 
 import com.example.makeitso.model.Task
+import com.example.makeitso.model.User
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.StorageService
 import com.example.makeitso.model.service.trace
@@ -27,7 +28,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.tasks.await
 
 class StorageServiceImpl
@@ -37,7 +40,15 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override val tasks: Flow<List<Task>>
-    get() = emptyFlow()
+    get() = auth.currentUser.flatMapLatest { user ->
+      firestore.collection(TASK_COLLECTION).whereEqualTo(USER_ID_FIELD, user.uid).dataObjects()
+    }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  override val users: Flow<List<User>>
+    get() = auth.currentUser.flatMapLatest { user ->
+      firestore.collection(USERS_COLLECTION).whereEqualTo(UID_FIELD, user.uid).dataObjects()
+    }
 
   override suspend fun getTask(taskId: String): Task? =
     firestore.collection(TASK_COLLECTION).document(taskId).get().await().toObject()
@@ -57,9 +68,26 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
     firestore.collection(TASK_COLLECTION).document(taskId).delete().await()
   }
 
+  override suspend fun getUser(userId: String): User? =
+    firestore.collection(USERS_COLLECTION).document(userId).get().await().toObject()
+
+  override suspend fun save(user: User) {
+    firestore.collection(USERS_COLLECTION).add(user).await()
+  }
+
+  override suspend fun update(user: User) {
+    firestore.collection(USERS_COLLECTION).document(user.id).set(user).await()
+  }
+
+  override suspend fun delete(user: User) {
+    firestore.collection(TASK_COLLECTION).document(user.id).delete().await()
+  }
+
   companion object {
+    private const val UID_FIELD = "uid"
     private const val USER_ID_FIELD = "userId"
     private const val TASK_COLLECTION = "tasks"
+    private const val USERS_COLLECTION = "users"
     private const val SAVE_TASK_TRACE = "saveTask"
     private const val UPDATE_TASK_TRACE = "updateTask"
   }

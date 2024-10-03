@@ -90,7 +90,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
 
     //Google
-    implementation("com.google.android.gms:play-services-auth:18.1.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     //Test
     testImplementation("junit:junit:4.+")

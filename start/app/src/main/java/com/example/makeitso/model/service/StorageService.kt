@@ -17,12 +17,20 @@ limitations under the License.
 package com.example.makeitso.model.service
 
 import com.example.makeitso.model.Task
+import com.example.makeitso.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface StorageService {
   val tasks: Flow<List<Task>>
+  val users: Flow<List<User>>
+
   suspend fun getTask(taskId: String): Task?
   suspend fun save(task: Task): String
   suspend fun update(task: Task)
   suspend fun delete(taskId: String)
+
+  suspend fun getUser(userId: String): User?
+  suspend fun save(user: User)
+  suspend fun update(user: User)
+  suspend fun delete(user: User)
 }

@@ -18,6 +18,7 @@ package com.example.makeitso.model.service
 
 import com.example.makeitso.model.User
 import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 
 interface AccountService {
@@ -34,4 +35,5 @@ interface AccountService {
   suspend fun linkAccount(authCredential: AuthCredential)
   suspend fun deleteAccount()
   suspend fun signOut()
+  fun getCurrentAccount(): FirebaseUser
 }

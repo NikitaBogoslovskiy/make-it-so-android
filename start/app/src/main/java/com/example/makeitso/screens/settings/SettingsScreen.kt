@@ -74,7 +74,6 @@ fun SettingsScreenContent(
       RegularCardEditor(AppText.sign_in, AppIcon.ic_sign_in, "", Modifier.card()) {
         onLoginClick()
       }
-
       RegularCardEditor(AppText.create_account, AppIcon.ic_create_account, "", Modifier.card()) {
         onSignUpClick()
       }

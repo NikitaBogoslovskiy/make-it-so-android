@@ -25,8 +25,10 @@ import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.ext.isValidPassword
 import com.example.makeitso.common.ext.passwordMatches
 import com.example.makeitso.common.snackbar.SnackbarManager
+import com.example.makeitso.model.User
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
+import com.example.makeitso.model.service.StorageService
 import com.example.makeitso.screens.MakeItSoViewModel
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,18 +39,6 @@ class SignUpViewModel @Inject constructor(
   private val accountService: AccountService,
   logService: LogService
 ) : MakeItSoViewModel(logService) {
-  private lateinit var popup: () -> Unit
-
-  init {
-    GoogleAuthData.signup = { token ->
-      val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
-      launchCatching {
-        accountService.linkAccount(firebaseCredential)
-        popup()
-      }
-    }
-  }
-
   var uiState = mutableStateOf(SignUpUiState())
     private set
 
@@ -89,10 +79,5 @@ class SignUpViewModel @Inject constructor(
       accountService.linkAccount(email, password)
       openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
     }
-  }
-
-  fun onSignUpWithGoogleClick(openAndPopUp: (String, String) -> Unit) {
-    popup = { openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN) }
-    GoogleAuthData.beginSignUp()
   }
 }

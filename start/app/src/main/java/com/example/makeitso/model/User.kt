@@ -16,7 +16,31 @@ limitations under the License.
 
 package com.example.makeitso.model
 
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentId
+
 data class User(
-    val id: String = "",
-    val isAnonymous: Boolean = true
-)
+    @DocumentId val id: String = "",
+    val uid: String = "",
+    val isAnonymous: Boolean = true,
+    val name: String = "",
+    val birthDate: String = "",
+    val login: String = "",
+    val authTypes: List<String> = emptyList()
+) {
+    companion object {
+        @JvmStatic
+        fun fromFirebaseUser(firebaseUser: FirebaseUser) = User(
+            uid = firebaseUser.uid,
+            name = firebaseUser.displayName ?: "",
+            login = firebaseUser.email ?: "",
+            authTypes = firebaseUser.providerData.map {
+                when (it.providerId) {
+                    "password" -> "Login and Password"
+                    "google.com" -> "Google Account"
+                    else -> ""
+                }
+            }.filter { it != "" }
+        )
+    }
+}

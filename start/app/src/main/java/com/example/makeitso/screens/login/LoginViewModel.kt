@@ -18,13 +18,16 @@ package com.example.makeitso.screens.login
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.makeitso.GoogleAuthData
 import com.example.makeitso.LOGIN_SCREEN
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.snackbar.SnackbarManager
+import com.example.makeitso.model.User
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
+import com.example.makeitso.model.service.StorageService
 import com.example.makeitso.screens.MakeItSoViewModel
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +38,7 @@ import com.example.makeitso.R.string as AppText
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val accountService: AccountService,
+  private val storageService: StorageService,
   logService: LogService,
 ) : MakeItSoViewModel(logService) {
   private lateinit var popup: () -> Unit
@@ -45,6 +49,7 @@ class LoginViewModel @Inject constructor(
         launchCatching {
           accountService.authenticate(firebaseCredential)
           popup()
+          saveUserIfDoNotExist()
         }
       }
   }
@@ -97,5 +102,21 @@ class LoginViewModel @Inject constructor(
       accountService.sendRecoveryEmail(email)
       SnackbarManager.showMessage(AppText.recovery_email_sent)
     }
+  }
+
+  private suspend fun saveUserIfDoNotExist() {
+    //val firebaseUser = accountService.getCurrentAccount()
+    storageService.users.collect {
+      var user = it.firstOrNull()
+      if (user == null) {
+        user = User.fromFirebaseUser(accountService.getCurrentAccount())
+        storageService.save(user)
+      }
+    }
+/*    var user = storageService.getUser(firebaseUser.uid)
+    if (user == null) {
+      user = User.fromFirebaseUser(accountService.getCurrentAccount())
+      storageService.save(user)
+    }*/
   }
 }

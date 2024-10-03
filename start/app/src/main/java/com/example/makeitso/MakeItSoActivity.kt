@@ -41,23 +41,7 @@ class MakeItSoActivity : AppCompatActivity() {
         .addOnSuccessListener(this) { result ->
           try {
             startIntentSenderForResult(
-              result.pendingIntent.intentSender, GoogleAuthData.REQ_ONE_TAP_AUTH,
-              null, 0, 0, 0, null)
-          } catch (e: IntentSender.SendIntentException) {
-            Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
-          }
-        }
-        .addOnFailureListener(this) { e ->
-          Log.d(TAG, e.localizedMessage)
-        }
-    }
-
-    GoogleAuthData.beginSignUp = {
-      GoogleAuthData.oneTapClient.beginSignIn(GoogleAuthData.signUpRequest)
-        .addOnSuccessListener(this) { result ->
-          try {
-            startIntentSenderForResult(
-              result.pendingIntent.intentSender, GoogleAuthData.REQ_ONE_TAP_SIGNUP,
+              result.pendingIntent.intentSender, GoogleAuthData.REQ_ONE_TAP,
               null, 0, 0, 0, null)
           } catch (e: IntentSender.SendIntentException) {
             Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")

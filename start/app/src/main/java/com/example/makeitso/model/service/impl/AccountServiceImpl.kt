@@ -41,7 +41,7 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
     get() = callbackFlow {
       val listener =
         FirebaseAuth.AuthStateListener { auth ->
-          this.trySend(auth.currentUser?.let { User(it.uid, it.isAnonymous) } ?: User())
+          this.trySend(auth.currentUser?.let { User(uid = it.uid, isAnonymous = it.isAnonymous) } ?: User())
         }
       auth.addAuthStateListener(listener)
       awaitClose { auth.removeAuthStateListener(listener) }
@@ -95,7 +95,7 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
     createAnonymousAccount()
   }
 
-  private fun getCurrentAccount() = auth.currentUser!!
+  override fun getCurrentAccount() = auth.currentUser!!
 
   private fun deleteAccount(account: FirebaseUser) {
       account.delete()
